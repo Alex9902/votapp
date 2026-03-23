@@ -15,7 +15,7 @@ VotAppEdu es una solución digital diseñada para modernizar la toma de decision
 
 ### Frontend
 ![HTML5](https://img.shields.io/badge/html5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/tailwindcss-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 
 ### Librerías Clave
@@ -45,10 +45,8 @@ El sistema no se limita a un solo tipo de elección. Permite configurar:
 
 ## 📂 Estructura del Proyecto
 
-* `/src/backend`: Servidor Node.js y API Rest.
-* `/src/frontend`: Interfaz de usuario con Vanilla JS.
-* `/database`: Scripts SQL para la creación de tablas en MySQL.
-* `/docs`: Documentación del proyecto y guía de usuario.
+* `/backend`: Servidor Node.js y API Rest.
+* `/frontend`: Interfaz de usuario con Vanilla JS.
 
 ---
 

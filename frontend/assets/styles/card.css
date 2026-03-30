@@ -1,0 +1,47 @@
+
+.card-component {
+    border-radius: 2rem;
+    background-color: var(--primario-fijo);
+    padding: 1rem;
+}
+
+.icono-card {
+    width: 5rem;
+    height: 5rem;
+    background-color: var(--primario-fijo);
+    border-radius: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s;
+    color: var(--primario);
+    font-size: 2.5rem;
+}
+
+.icono-card:hover {
+    transform: scale(1.1);
+}
+
+.card-component h2 {
+    font-size: 1.5rem;
+    color: var(--texto-variante);
+}
+
+.card-component p {
+    font-size: 0.9rem;
+    line-height: 1.4rem;
+    color: var(--contorno-variante);
+}
+
+.card-component button {
+    background-color: var(--terciario);
+    color: var(--sobre-terciario);
+    padding: 0.9rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+}
+
+.card-component button:hover {
+    opacity: 0.9;
+}

@@ -15,14 +15,32 @@
     --sobre-primario-fijo: #001847;
 }
 
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Inter', sans-serif;
-    background-color: var(--superficie);
-    color: #1b1b1e;
-    margin: 0;
-    overflow-x: hidden;
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    width: 40vw;
+    height: 40vw;
+    border-radius: 50%;
+    filter: blur(120px);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/*Bola1*/
+body::before {
+    top: -10%;
+    left: -10%;
+    background: var(--primario-fijo);
+    opacity: 0.5;
+}
+
+/*Bol2*/
+body::after {
+    bottom: -10%;
+    right: -10%;
+    background: #a3f69c;
+    opacity: 0.3;
 }
 
 .fuente-titular {

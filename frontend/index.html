@@ -72,7 +72,7 @@
             </div>
 
             <div class="contenedor-principal">
-                <form id="formulario-login" autocomplete="off">
+                <form id="formulario" autocomplete="off">
                     <div class="mb-4">
                         <label class="form-label small fw-bold  text-secondary ms-1 mb-2" autocomplete="off">DNI</label>
                         <div class="contenedor-icono-input">
@@ -102,8 +102,7 @@
                     <a class="d-block small fw-bold text-decoration-none text-primary mb-3">¿Olvidaste tus
                         credenciales?</a>
                     <p class="small text-secondary mb-0">
-                        ¿Problemas para acceder? <a
-                            class="fw-bold text-primary text-decoration-none">Soporte</a>
+                        ¿Problemas para acceder? <a class="fw-bold text-primary text-decoration-none">Soporte</a>
                     </p>
                 </div>
             </div>
@@ -119,20 +118,41 @@
     </main>
 </body>
 <script>
-    const DOM = {};
 
+const form = document.getElementById("formulario");
 
-        DOM.form = document.getElementById("formulario-login");
-        DOM.dni = document.getElementById("dni");
-        DOM.pass = document.getElementById("pass");
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const datos = {
+        dni: document.getElementById("dni").value,
+        pass: document.getElementById("pass").value
+    };
 
-        console.log("DOM cargado correctamente", DOM);
+    try {
+        
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(datos)
+        });
 
-    DOM.form.addEventListener('submit', e => {
-        e.preventDefault();
+        const resultado = await response.json();
 
+        if (response.ok) {
+            localStorage.setItem('token_votapp', resultado.token);
+            
+            window.location.href = resultado.redirect;
+        } else {
+            alert("Error: " + resultado.error);
+        }
 
-    });
+    } catch (error) {
+        console.error("Error en la conexión:", error);
+    }
+});
 </script>
 
 </html>

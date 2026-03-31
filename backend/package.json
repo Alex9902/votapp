@@ -8,7 +8,6 @@
     "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  
   "keywords": [
     "Node.js",
     "Express",
@@ -17,11 +16,11 @@
     "TFG",
     "IES-Joan-Coromines"
   ],
-
   "author": "Alex",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^17.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.3"

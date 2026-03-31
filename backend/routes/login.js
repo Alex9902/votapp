@@ -13,7 +13,11 @@ const userDB = {
     dni: '12345678L',
     passwordHash: '$2b$10$pkzfX7s8NC04zHX30O3Mz.5cnwUml..7ceid795X4f1pZaj.X9Cou' //=prueba
 };
-
+/**
+ * Sistema de auth por cookie
+ * genera una cookeie de 2h con el JWT verificado y la envia al cliente como respuesta
+ * esto permite manejar el reediccionamiento no autorizado
+ */
 router.post('/login', async (req, res) => {
 
     try {
@@ -35,6 +39,12 @@ router.post('/login', async (req, res) => {
                 JWT_KEY,
             {expiresIn:'2h'}
         );
+
+            res.cookie('token_votapp', token, {
+                httpOnly: true,
+                secure:false,
+                maxAge: 7200000 //2h
+            })
 
             return res.json({
                 success: true,

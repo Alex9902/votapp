@@ -15,7 +15,7 @@ const userDB = {
 };
 /**
  * Sistema de auth por cookie
- * genera una cookeie de 2h con el JWT verificado y la envia al cliente como respuesta
+ * genera una cookie de 2h con el JWT verificado y la envia al cliente como respuesta
  * esto permite manejar el reediccionamiento no autorizado
  */
 router.post('/login', async (req, res) => {
@@ -61,6 +61,7 @@ router.post('/login', async (req, res) => {
 
     } catch (err) {
         console.error(err);
+        
         res.status(500).json({
             error: "Error interno del servidor"
         });

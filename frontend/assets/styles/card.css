@@ -44,4 +44,6 @@
 
 .card-component button:hover {
     opacity: 0.9;
+    background-color: var(--terciario-contenedor);
+    color:white;
 }

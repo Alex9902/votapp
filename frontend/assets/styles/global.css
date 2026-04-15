@@ -85,3 +85,9 @@ body::after {
 .contenedor-icono-input:focus-within .material-symbols-outlined {
     color: var(--primario);
 }
+a{
+    transition: transform 0.3s;
+}
+a:hover{
+    transform: scale(1.07);
+}

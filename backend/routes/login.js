@@ -1,71 +1,72 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-
 const jwt = require('jsonwebtoken');
+const { Usuario } = require('../models');
 
 const JWT_KEY = process.env.JWT_KEY;
-/**
- * //TODO cambiar credenciales cuando haya conexión a db
- * cerdenciales de preuba hardcodeados
- */
-const userDB = {
-    dni: '12345678L',
-    passwordHash: '$2b$10$pkzfX7s8NC04zHX30O3Mz.5cnwUml..7ceid795X4f1pZaj.X9Cou' //=prueba
-};
+
 /**
  * Sistema de auth por cookie
  * genera una cookie de 2h con el JWT verificado y la envia al cliente como respuesta
- * esto permite manejar el reediccionamiento no autorizado
+ * esto permite manejar el redireccionamiento no autorizado
  */
 router.post('/login', async (req, res) => {
-
     try {
         const { dni, pass } = req.body;
 
-        if (dni !== userDB.dni) {
+        if (!dni || !pass) {
+            return res.status(400).json({
+                error: "DNI y contraseña son requeridos"
+            });
+        }
 
+        // Buscar usuario en la base de datos
+        const user = await Usuario.findOne({ where: { dni } });
+
+        if (!user) {
             return res.status(401).json({
                 error: "Credenciales incorrectas"
             });
         }
 
-        const match = await bcrypt.compare(pass, userDB.passwordHash);
+        // Comparar contraseña con el hash
+        const match = await bcrypt.compare(pass, user.password_hash);
 
         if (match) {
-
             const token = jwt.sign(
-                {dni: userDB.dni},
+                { 
+                    id_usuario: user.id_usuario,
+                    dni: user.dni,
+                    es_admin: user.es_admin
+                },
                 JWT_KEY,
-            {expiresIn:'2h'}
-        );
+                { expiresIn: '2h' }
+            );
 
             res.cookie('token_votapp', token, {
                 httpOnly: true,
-                secure:false,
-                maxAge: 7200000 //2h
-            })
+                secure: false, // Cambiar a true si se despliega en producción con HTTPS
+                maxAge: 7200000 // 2 horas en ms
+            });
 
             return res.json({
                 success: true,
-                message : "Login correcto",
+                message: "Login correcto",
                 token: token,
                 redirect: '/views/home.html'
             });
-
         } else {
             return res.status(401).json({
                 error: "Credenciales incorrectas"
             });
         }
-
     } catch (err) {
-        console.error(err);
-        
-        res.status(500).json({
+        console.error("Error en /api/login:", err);
+        return res.status(500).json({
             error: "Error interno del servidor"
         });
     }
 });
 
-module.exports = router;
+module.exports = router;

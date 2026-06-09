@@ -5,13 +5,13 @@ function auth(req, res, next) {
 
     if (!token) res.redirect('/');
 
-    try{
+    try {
         const verificar = jwt.verify(token, process.env.JWT_KEY);
-        
+
         req.userData = verificar;
         next();
-    
-    } catch{
+
+    } catch {
         res.clearCookie('token_votapp');
         return res.redirect('/');
     }

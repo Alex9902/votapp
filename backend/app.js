@@ -7,6 +7,7 @@ const app = express();
 
 const auth = require("./middleware/auth");
 const login = require('./routes/login');
+const userRoutes = require('./routes/userRoutes');
 
 app.use(express.json());
 app.use(cookieParser());
@@ -20,14 +21,16 @@ app.use(cookieParser());
  */
 app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
 app.use('/api', login);
+app.use('/api', userRoutes);
 
 
 app.use('/views', auth, express.static(path.join(__dirname, '../frontend/views')));
 
 app.get('/', (req, res) => {
-    if (req.cookies && req.cookies.token_votapp) return;
-
-    else res.sendFile(path.join(__dirname, '../frontend/index.html'));
+    if (req.cookies && req.cookies.token_votapp) {
+        return res.redirect('/views/home.html');
+    }
+    return res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
 app.listen(8080, () => console.log("http://localhost:8080"));

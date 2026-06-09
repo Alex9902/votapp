@@ -3,9 +3,10 @@ class CardComponent extends HTMLElement {
         const icono = this.getAttribute('icono');
         const titulo = this.getAttribute('titulo');
         const descripcion = this.getAttribute('descripcion');
-        const botonText = this.getAttribute('boton-text');
+        const textoBoton = this.getAttribute('boton-text');
+        const idRol = this.getAttribute('rol-id');
 
-        this.innerHTML = /*html*/ `
+        this.innerHTML = `
         <div class="card text-center h-100 border-0 shadow-sm position-relative card-component">
             <div class="d-flex align-items-center justify-content-center mx-auto mt-3 mb-4 icono-card bg-light">
         
@@ -22,12 +23,23 @@ class CardComponent extends HTMLElement {
                 ${descripcion}
             </p>
         
-            <button class="btn w-100 fw-bold">
-                ${botonText}
+            <button class="btn w-100 fw-bold boton-votar">
+                ${textoBoton}
             </button>
         
         </div>
         `;
+
+        const boton = this.querySelector('.boton-votar');
+        if (boton) {
+            boton.addEventListener('click', () => {
+                if (idRol) {
+                    window.location.href = `elecciones.html?rolId=${idRol}&rolNombre=${encodeURIComponent(titulo)}`;
+                } else {
+                    console.warn("Falta el atributo rol-id en app-card");
+                }
+            });
+        }
     }
 }
 

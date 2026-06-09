@@ -25,35 +25,86 @@
         <h1 class="text-center mb-4 fw-bold" style="color: var(--primario-contenedor); font-size: 60px;">
             Selecciona tu Rol
         </h1>
-        <p class="text-center mb-3 text-secondary fw-semibold">Votapp garantiza la transparencia del proceso electoral, por favor identifica tu rol</p>
-        <div class="row g-4 mt-4">
-            <div class="col-12 col-md-4">
-                <app-card icono="backpack" titulo="Alumnos"
-                    descripcion="Estudiantes matriculados que participan en elecciones" boton-text="VOTA">
-                </app-card>
-            </div>
+        <p class="text-center mb-3 text-secondary fw-semibold">Votapp garantiza la transparencia del proceso electoral,
+            por favor identifica tu rol</p>
 
-            <div class="col-12 col-md-4">
-                <app-card icono="family_restroom" titulo="Padres y Madres"
-                    descripcion="Representantes en las familias que participan en elecciones" boton-text="VOTA">
-                </app-card>
-            </div>
-
-            <div class="col-12 col-md-4">
-                <app-card icono="school" titulo="Profesores" descripcion="Equipo docente que participan en elecciones"
-                    boton-text="VOTA">
-                </app-card>
+        <div class="row g-4 mt-4" id="roles-contenedor">
+            <div class="col-12 text-center text-secondary py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
             </div>
         </div>
 
-        <div class="d-flex align-items-center justify-content-center rounded-5 p-2 mx-auto" 
-        style="background-color: var(--primario-fijo); color: var(--primario); font-weight: 500; width: 35%; margin-top: 200px;">
+        <div class="d-flex align-items-center justify-content-center rounded-5 p-2 mx-auto"
+            style="background-color: var(--primario-fijo); color: var(--primario); font-weight: 500; width: 35%; margin-top: 150px;">
             <span class="material-symbols-outlined">shield_locked</span>
-            <span class="ms-2" style="color:var(--texto-variante);">Sistema de votación cifrado de extremo a extremo</span>
+            <span class="ms-2" style="color:var(--texto-variante);">Sistema de votación cifrado de extremo a
+                extremo</span>
         </div>
     </main>
     <script src="../assets/components/header.js"></script>
     <script src="../assets/components/card.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const contenedor = document.getElementById("roles-contenedor");
+
+            try {
+                const res = await fetch('/api/roles');
+                const data = await res.json();
+
+                if (!res.ok) {
+                    console.error("Error al obtener roles:", data.error);
+                    contenedor.innerHTML = `<div class="col-12 text-center text-danger fw-bold">Error al cargar roles. Por favor, inicia sesión de nuevo.</div>`;
+                    return;
+                }
+
+                const roles = data.roles || [];
+
+                if (roles.length === 0) {
+                    contenedor.innerHTML = `<div class="col-12 text-center text-secondary fw-semibold py-5">No tienes ningún rol asignado en el sistema para votar.</div>`;
+                    return;
+                }
+
+                contenedor.innerHTML = "";
+
+                roles.forEach(rol => {
+                    const col = document.createElement("div");
+                    col.className = "col-12 col-md-4";
+
+                    let icono = "person";
+                    let descripcion = "Participante registrado en las elecciones";
+                    const nombre = rol.nombre_rol.toLowerCase();
+
+                    if (nombre.includes("alumn")) {
+                        icono = "backpack";
+                        descripcion = "Estudiantes matriculados que participan en elecciones";
+                    } else if (nombre.includes("padr") || nombre.includes("madr") || nombre.includes("famili")) {
+                        icono = "family_restroom";
+                        descripcion = "Representantes en las familias que participan en elecciones";
+                    } else if (nombre.includes("prof") || nombre.includes("docent") || nombre.includes("maestr")) {
+                        icono = "school";
+                        descripcion = "Equipo docente que participa en elecciones";
+                    }
+
+                    col.innerHTML = `
+                        <app-card 
+                            icono="${icono}" 
+                            titulo="${rol.nombre_rol}" 
+                            descripcion="${descripcion}" 
+                            boton-text="VOTA"
+                            rol-id="${rol.id_subcategoria}">
+                        </app-card>
+                    `;
+                    contenedor.appendChild(col);
+                });
+
+            } catch (error) {
+                console.error("Error de conexión:", error);
+                contenedor.innerHTML = `<div class="col-12 text-center text-danger fw-bold py-5">Error de conexión al cargar roles.</div>`;
+            }
+        });
+    </script>
 </body>
 
 </html>

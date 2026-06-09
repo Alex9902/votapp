@@ -1,7 +1,7 @@
 class Header extends HTMLElement {
     connectedCallback() {
 
-        this.innerHTML = /*html*/ `
+        this.innerHTML = `
         <header>
             <nav class="d-flex justify-content-between align-items-center p-4">
                 <a class="text-decoration-none" href="./home.html">
@@ -16,8 +16,7 @@ class Header extends HTMLElement {
         
                 <div class="d-flex gap-3 align-items-center">
                     <a href="info.html" class="text-decoration-none text-reset"><span class="material-symbols-outlined">info</span></a>
-                    <a href="../index.html" class="text-decoration-none text-reset"><span class="material-symbols-outlined">logout</span></a>
-                    <!-- TODO arreglar ruta logout esta cifrada por api -->
+                    <a href="/api/logout" class="text-decoration-none text-reset"><span class="material-symbols-outlined">logout</span></a>
                     <a href="" class="d-block text-decoration-none text-reset" style="width: 40px; height: 40px;">
                         <img class="w-100 h-100 object-fit-cover rounded-circle" src="../assets/public/user.png">
                     </a>

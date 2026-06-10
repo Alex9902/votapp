@@ -6,8 +6,10 @@ const cookieParser = require('cookie-parser');
 const app = express();
 
 const auth = require("./middleware/auth");
+const adminAuth = require("./middleware/adminAuth");
 const login = require('./routes/login');
 const userRoutes = require('./routes/userRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 app.use(express.json());
 app.use(cookieParser());
@@ -22,6 +24,7 @@ app.use(cookieParser());
 app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
 app.use('/api', login);
 app.use('/api', userRoutes);
+app.use('/api/admin', auth, adminAuth, adminRoutes);
 
 
 app.use('/views', auth, express.static(path.join(__dirname, '../frontend/views')));

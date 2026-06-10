@@ -24,6 +24,7 @@ router.get('/roles', auth, async (req, res) => {
         }
 
         return res.json({
+            es_admin: usuario.es_admin,
             roles: usuario.subcategoria
         });
 

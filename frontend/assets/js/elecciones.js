@@ -3,36 +3,54 @@ document.addEventListener("DOMContentLoaded", async () => {
     let idRol = parametrosURL.get('rolId');
     let nombreRol = parametrosURL.get('rolNombre');
 
-    //fallback
-    if (!idRol) {
-        idRol = sessionStorage.getItem('rolIdActivo');
-        nombreRol = sessionStorage.getItem('rolNombreActivo');
-    } else {
-        sessionStorage.setItem('rolIdActivo', idRol);
-        sessionStorage.setItem('rolNombreActivo', nombreRol || 'Rol Seleccionado');
-    }
-
     const subtitulo = document.getElementById("subtitulo-rol");
     const contenedor = document.getElementById("elecciones-contenedor");
 
-    //si falla todo hacemos peticion para encontrar rol
-    if (!idRol) {
-        try {
-            const respuestaRoles = await fetch('/api/roles');
+    try {
+        const respuestaRoles = await fetch('/api/roles');
+        if (respuestaRoles.ok) {
+            const datosRoles = await respuestaRoles.json();
 
-            if (respuestaRoles.ok) {
-                const datosRoles = await respuestaRoles.json();
-                const roles = datosRoles.roles || [];
+            //si es admin forzar a poner roladmin
+            if (datosRoles.es_admin) {
+                idRol = 'admin';
+                nombreRol = 'admin';
+                sessionStorage.setItem('rolIdActivo', 'admin');
+                sessionStorage.setItem('rolNombreActivo', 'admin');
 
-                if (roles.length === 1) {
-                    idRol = roles[0].id_subcategoria;
-                    nombreRol = roles[0].nombre_rol;
+            } else {
+                if (!idRol) {
+                    idRol = sessionStorage.getItem('rolIdActivo');
+                    nombreRol = sessionStorage.getItem('rolNombreActivo');
+
+                } else {
                     sessionStorage.setItem('rolIdActivo', idRol);
-                    sessionStorage.setItem('rolNombreActivo', nombreRol);
+                    sessionStorage.setItem('rolNombreActivo', nombreRol || 'Rol Seleccionado');
+                }
+                if (!idRol) {
+                    const roles = datosRoles.roles || [];
+
+                    if (roles.length === 1) {
+                        idRol = roles[0].id_subcategoria;
+                        nombreRol = roles[0].nombre_rol;
+                        sessionStorage.setItem('rolIdActivo', idRol);
+                        sessionStorage.setItem('rolNombreActivo', nombreRol);
+                    }
                 }
             }
-        } catch (error) {
-            console.error("Error al obtener roles en fallback de elecciones:", error);
+        } else {
+            // Si la llamada falla, hacemos fallback a sessionStorage
+            if (!idRol) {
+                idRol = sessionStorage.getItem('rolIdActivo');
+                nombreRol = sessionStorage.getItem('rolNombreActivo');
+            }
+        }
+    } catch (error) {
+        console.error("Error al obtener roles:", error);
+
+        if (!idRol) {
+            idRol = sessionStorage.getItem('rolIdActivo');
+            nombreRol = sessionStorage.getItem('rolNombreActivo');
         }
     }
 

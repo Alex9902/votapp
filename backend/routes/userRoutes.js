@@ -42,13 +42,30 @@ router.get('/roles', auth, async (req, res) => {
 router.get('/elecciones', auth, async (req, res) => {
     try {
         const idUsuario = req.userData.id_usuario;
-        const idRol = parseInt(req.query.rolId, 10);
+        const esAdmin = req.userData.es_admin;
+        const ahora = new Date();
 
-        if (!idRol) {
+        //admin = todas las elecciones
+        if (esAdmin) {
+            const elecciones = await Votacion.findAll({
+                where: {
+                    fecha_inicio: { [Op.lte]: ahora },
+                    fecha_fin: { [Op.gte]: ahora }
+                }
+            });
+
+            return res.json({ elecciones });
+        }
+
+        const rolQuery = req.query.rolId;
+        if (!rolQuery) {
             return res.status(400).json({ error: "El parámetro rolId es requerido" });
         }
 
-        const ahora = new Date();
+        const idRol = parseInt(rolQuery, 10);
+        if (!idRol) {
+            return res.status(400).json({ error: "El parámetro rolId debe ser un número válido" });
+        }
 
         //obtiene las participaciones en roles ya votadas
         const participaciones = await RegistroParticipacion.findAll({

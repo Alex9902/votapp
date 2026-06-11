@@ -3,7 +3,7 @@ class CardEleccionComponent extends HTMLElement {
         const idVotacion = this.getAttribute('id-votacion');
         const titulo = this.getAttribute('titulo');
         const descripcion = this.getAttribute('descripcion') || 'Sin descripción disponible';
-        
+
         const formatearFecha = (cadenaFecha) => {
             if (!cadenaFecha) return 'No definida';
             try {
@@ -15,12 +15,12 @@ class CardEleccionComponent extends HTMLElement {
 
         const fechaInicio = formatearFecha(this.getAttribute('fecha-inicio'));
         const fechaFin = formatearFecha(this.getAttribute('fecha-fin'));
-        
+
         const tipoSeleccion = this.getAttribute('tipo-seleccion') === 'multiple' ? 'Múltiple' : 'Única';
         const maxSelecciones = this.getAttribute('max-selecciones') || '1';
         const esAnonima = this.getAttribute('es-anonima') === 'true' || this.getAttribute('es-anonima') === '1';
 
-        this.innerHTML = /*html*/ `
+        this.innerHTML = `
         <div class="card h-100 border-0 shadow-sm position-relative card-component p-4 d-flex flex-column justify-content-between">
             <div>
                 <div class="d-flex justify-content-between align-items-start mb-3">
@@ -67,7 +67,7 @@ class CardEleccionComponent extends HTMLElement {
         const boton = this.querySelector('.boton-votar-eleccion');
         if (boton) {
             boton.addEventListener('click', () => {
-                const idRol = new URLSearchParams(window.location.search).get('rolId');
+                const idRol = new URLSearchParams(window.location.search).get('rolId') || sessionStorage.getItem('rolIdActivo');
                 window.location.href = `votar.html?id_votacion=${idVotacion}&rolId=${idRol}`;
             });
         }

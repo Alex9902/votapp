@@ -19,7 +19,7 @@
 
 <body>
     <app-header></app-header>
-    
+    <script src="../assets/js/elecciones.js"></script>
     <main class="container py-5">
         <div class="text-center mb-5">
             <h1 class="fw-bold display-5 mb-2" style="color: var(--primario-contenedor);">
@@ -42,84 +42,6 @@
 
     <script src="../assets/components/header.js"></script>
     <script src="../assets/components/card_eleccion.js"></script>
-    
-    <script>
-        document.addEventListener("DOMContentLoaded", async () => {
-            const parametrosURL = new URLSearchParams(window.location.search);
-            const idRol = parametrosURL.get('rolId');
-            const nombreRol = parametrosURL.get('rolNombre') || 'Rol Seleccionado';
-
-            const subtitulo = document.getElementById("subtitulo-rol");
-            const contenedor = document.getElementById("elecciones-contenedor");
-
-            if (!idRol) {
-                subtitulo.textContent = "Error: No se ha seleccionado ningún rol.";
-                contenedor.innerHTML = `
-                    <div class="col-12 text-center py-5">
-                        <p class="text-danger fw-bold fs-5">Falta el identificador de rol en la URL.</p>
-                        <a href="home.html" class="btn btn-primary mt-3 px-4 py-2 rounded-3 fw-bold">Volver al Inicio</a>
-                    </div>
-                `;
-                return;
-            }
-
-            subtitulo.innerHTML = `Rol Activo: <span class="text-primary fw-bold">${nombreRol}</span>`;
-
-            try {
-                const respuesta = await fetch(`/api/elecciones?rolId=${idRol}`);
-                const datos = await respuesta.json();
-
-                if (!respuesta.ok) {
-                    console.error("Error al obtener elecciones:", datos.error);
-                    contenedor.innerHTML = `<div class="col-12 text-center text-danger fw-bold py-5">Error al cargar las elecciones de la base de datos.</div>`;
-                    return;
-                }
-
-                const elecciones = datos.elecciones || [];
-
-                if (elecciones.length === 0) {
-                    contenedor.innerHTML = `
-                        <div class="col-12 text-center py-5">
-                            <div class="mb-4">
-                                <span class="material-symbols-outlined text-secondary opacity-50" style="font-size: 5rem;">
-                                    verified_user
-                                </span>
-                            </div>
-                            <h3 class="fw-bold text-secondary">¡Estás al día!</h3>
-                            <p class="text-muted mt-2">No hay elecciones activas o ya has participado en todas las votaciones vigentes para este rol.</p>
-                            <a href="home.html" class="btn btn-outline-primary mt-4 px-4 py-2 rounded-3 fw-bold">Volver al Selector de Roles</a>
-                        </div>
-                    `;
-                    return;
-                }
-
-                contenedor.innerHTML = ""; // Limpiar spinner
-
-                elecciones.forEach(eleccion => {
-                    const columna = document.createElement("div");
-                    columna.className = "col-12 col-md-6 col-lg-4";
-                    
-                    columna.innerHTML = `
-                        <app-eleccion
-                            id-votacion="${eleccion.id_votacion}"
-                            titulo="${eleccion.titulo}"
-                            descripcion="${eleccion.descripcion || ''}"
-                            fecha-inicio="${eleccion.fecha_inicio}"
-                            fecha-fin="${eleccion.fecha_fin}"
-                            tipo-seleccion="${eleccion.tipo_seleccion}"
-                            max-selecciones="${eleccion.max_selecciones}"
-                            es-anonima="${eleccion.es_anonima}">
-                        </app-eleccion>
-                    `;
-                    contenedor.appendChild(columna);
-                });
-
-            } catch (error) {
-                console.error("Error de conexión:", error);
-                contenedor.innerHTML = `<div class="col-12 text-center text-danger fw-bold py-5">Error de conexión con el servidor.</div>`;
-            }
-        });
-    </script>
 </body>
 
 </html>

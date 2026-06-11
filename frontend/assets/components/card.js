@@ -33,7 +33,10 @@ class CardComponent extends HTMLElement {
         const boton = this.querySelector('.boton-votar');
         if (boton) {
             boton.addEventListener('click', () => {
+
                 if (idRol) {
+                    sessionStorage.setItem('rolIdActivo', idRol);
+                    sessionStorage.setItem('rolNombreActivo', titulo);
                     window.location.href = `elecciones.html?rolId=${idRol}&rolNombre=${encodeURIComponent(titulo)}`;
                 } else {
                     console.warn("Falta el atributo rol-id en app-card");

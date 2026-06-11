@@ -66,6 +66,11 @@
                     return;
                 }
 
+                if (roles.length === 1) {
+                    sessionStorage.setItem('rolIdActivo', roles[0].id_subcategoria);
+                    sessionStorage.setItem('rolNombreActivo', roles[0].nombre_rol);
+                }
+
                 contenedor.innerHTML = "";
 
                 roles.forEach(rol => {

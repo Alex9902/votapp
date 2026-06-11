@@ -15,13 +15,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const subtitulo = document.getElementById("subtitulo-rol");
     const contenedor = document.getElementById("elecciones-contenedor");
 
-    // Si no hay idRol ni en URL ni en sessionStorage, intentamos recuperar el rol si el usuario solo tiene uno
+    //si falla todo hacemos peticion para encontrar rol
     if (!idRol) {
         try {
             const respuestaRoles = await fetch('/api/roles');
+
             if (respuestaRoles.ok) {
                 const datosRoles = await respuestaRoles.json();
                 const roles = datosRoles.roles || [];
+
                 if (roles.length === 1) {
                     idRol = roles[0].id_subcategoria;
                     nombreRol = roles[0].nombre_rol;

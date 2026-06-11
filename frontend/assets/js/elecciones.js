@@ -22,14 +22,22 @@ document.addEventListener("DOMContentLoaded", async () => {
                 if (!idRol) {
                     idRol = sessionStorage.getItem('rolIdActivo');
                     nombreRol = sessionStorage.getItem('rolNombreActivo');
-
                 } else {
                     sessionStorage.setItem('rolIdActivo', idRol);
                     sessionStorage.setItem('rolNombreActivo', nombreRol || 'Rol Seleccionado');
                 }
-                if (!idRol) {
-                    const roles = datosRoles.roles || [];
 
+                // Validamos que el idRol corresponda a uno de los roles reales del usuario
+                const roles = datosRoles.roles || [];
+                const tieneRol = roles.some(r => r.id_subcategoria == idRol);
+                if (!tieneRol) {
+                    idRol = null;
+                    nombreRol = null;
+                    sessionStorage.removeItem('rolIdActivo');
+                    sessionStorage.removeItem('rolNombreActivo');
+                }
+
+                if (!idRol) {
                     if (roles.length === 1) {
                         idRol = roles[0].id_subcategoria;
                         nombreRol = roles[0].nombre_rol;
@@ -39,7 +47,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
             }
         } else {
-            // Si la llamada falla, hacemos fallback a sessionStorage
+
+            //si la llamada falla, hacemos fallback a sessionStorage
             if (!idRol) {
                 idRol = sessionStorage.getItem('rolIdActivo');
                 nombreRol = sessionStorage.getItem('rolNombreActivo');
@@ -70,6 +79,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     subtitulo.innerHTML = `Rol Activo: <span class="text-primary fw-bold">${nombreRol}</span>`;
+
+    const esProfesor = nombreRol.toLowerCase().includes('profesor') ||
+        nombreRol.toLowerCase().includes('docent') ||
+        nombreRol.toLowerCase().includes('maestr');
+
+    if (esProfesor) {
+        const accionesProfesor = document.getElementById("profesor-acciones");
+        if (accionesProfesor) {
+            accionesProfesor.classList.remove("d-none");
+
+            // Inicializar el modal con 2 opciones vacías si no existen
+            const contenedorOpcionesProfesor = document.getElementById("lista-inputs-opciones-profesor");
+            if (contenedorOpcionesProfesor && contenedorOpcionesProfesor.children.length === 0) {
+                window.añadirInputOpcionProfesor();
+                window.añadirInputOpcionProfesor();
+            }
+        }
+    }
 
     try {
         const respuesta = await fetch(`/api/elecciones?rolId=${idRol}`);
@@ -125,3 +152,90 @@ document.addEventListener("DOMContentLoaded", async () => {
         contenedor.innerHTML = `<div class="col-12 text-center text-danger fw-bold py-5">Error de conexión con el servidor.</div>`;
     }
 });
+
+window.añadirInputOpcionProfesor = () => {
+    const lista = document.getElementById("lista-inputs-opciones-profesor");
+    if (!lista) return;
+
+    const html = `
+        <div class="input-group input-opcion-item-profesor mb-2">
+            <input type="text" class="form-control p-2 text-opcion-val-profesor" placeholder="Nombre de la opción / Candidato" required>
+            <button class="btn btn-outline-danger" type="button" onclick="this.closest('.input-opcion-item-profesor').remove()">
+                <span class="material-symbols-outlined fs-6 align-middle">close</span>
+            </button>
+        </div>
+    `;
+    lista.insertAdjacentHTML('beforeend', html);
+};
+
+window.crearVotacionProfesor = async (e) => {
+    e.preventDefault();
+
+    const titulo = document.querySelector("#modalVotacionProfesor #vot-titulo").value;
+    const descripcion = document.querySelector("#modalVotacionProfesor #vot-descripcion").value;
+    const inicio = document.querySelector("#modalVotacionProfesor #vot-inicio").value;
+    const fin = document.querySelector("#modalVotacionProfesor #vot-fin").value;
+    const tipo = document.querySelector("#modalVotacionProfesor #vot-tipo").value;
+    const max = parseInt(document.querySelector("#modalVotacionProfesor #vot-max").value, 10);
+    const anonima = document.querySelector("#modalVotacionProfesor #vot-anonima").checked;
+    const tiemporeal = document.querySelector("#modalVotacionProfesor #vot-tiemporeal").checked;
+
+    const items = document.querySelectorAll(".text-opcion-val-profesor");
+    const opciones = [];
+
+    items.forEach(input => {
+        const val = input.value.trim();
+        if (val) {
+            opciones.push(val);
+        }
+    });
+
+    if (opciones.length < 2) {
+        alert("Debes añadir al menos 2 opciones.");
+        return;
+    }
+
+    const payload = {
+        titulo,
+        descripcion,
+        fecha_inicio: inicio,
+        fecha_fin: fin,
+        recuento_tiempo_real: tiemporeal,
+        es_anonima: anonima,
+        tipo_seleccion: tipo,
+        max_selecciones: max,
+        opciones
+    };
+
+    try {
+        const res = await fetch('/api/profesor/votaciones', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            alert("Votación creada con éxito para alumnos");
+
+            const modalEl = document.getElementById('modalVotacionProfesor');
+            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            if (modal) modal.hide();
+
+            document.getElementById("formulario-votacion-profesor").reset();
+            document.getElementById("lista-inputs-opciones-profesor").innerHTML = "";
+            window.añadirInputOpcionProfesor();
+            window.añadirInputOpcionProfesor();
+
+            location.reload();
+        } else {
+            alert("Error: " + data.error);
+        }
+    } catch (err) {
+        console.error("Error al crear votación:", err);
+        alert("Error de conexión al crear votación");
+    }
+};

@@ -27,9 +27,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                     sessionStorage.setItem('rolNombreActivo', nombreRol || 'Rol Seleccionado');
                 }
 
-                // Validamos que el idRol corresponda a uno de los roles reales del usuario
+                //validar rol
                 const roles = datosRoles.roles || [];
-                const tieneRol = roles.some(r => r.id_subcategoria == idRol);
+                const tieneRol = idRol ? idRol.split(',').every(id => roles.some(r => r.id_subcategoria == id)) : false;
+
                 if (!tieneRol) {
                     idRol = null;
                     nombreRol = null;
@@ -38,7 +39,19 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
 
                 if (!idRol) {
-                    if (roles.length === 1) {
+                    const esProfesor = roles.some(r => r.nombre_rol.toLowerCase().includes('profesor') || r.nombre_rol.toLowerCase().includes('docent') || r.nombre_rol.toLowerCase().includes('maestr'));
+                    const esPadre = roles.some(r => r.nombre_rol.toLowerCase().includes('padre') || r.nombre_rol.toLowerCase().includes('madre') || r.nombre_rol.toLowerCase().includes('familia'));
+
+                    if (esProfesor && esPadre) {
+                        const rolesFiltrados = roles.filter(r =>
+                            r.nombre_rol.toLowerCase().includes('profesor') || r.nombre_rol.toLowerCase().includes('docent') || r.nombre_rol.toLowerCase().includes('maestr') ||
+                            r.nombre_rol.toLowerCase().includes('padre') || r.nombre_rol.toLowerCase().includes('madre') || r.nombre_rol.toLowerCase().includes('familia')
+                        );
+                        idRol = rolesFiltrados.map(r => r.id_subcategoria).join(',');
+                        nombreRol = rolesFiltrados.map(r => r.nombre_rol).join(', ');
+                        sessionStorage.setItem('rolIdActivo', idRol);
+                        sessionStorage.setItem('rolNombreActivo', nombreRol);
+                    } else if (roles.length === 1) {
                         idRol = roles[0].id_subcategoria;
                         nombreRol = roles[0].nombre_rol;
                         sessionStorage.setItem('rolIdActivo', idRol);
@@ -141,7 +154,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                             fecha-fin="${eleccion.fecha_fin}"
                             tipo-seleccion="${eleccion.tipo_seleccion}"
                             max-selecciones="${eleccion.max_selecciones}"
-                            es-anonima="${eleccion.es_anonima}">
+                            es-anonima="${eleccion.es_anonima}"
+                            rol-id="${eleccion.id_subcategoria || ''}"
+                            rol-nombre="${eleccion.nombre_rol_votacion || ''}"
+                            ya-votado="${eleccion.ya_votado || false}"
+                            finalizada="${eleccion.finalizada || false}">
                         </app-eleccion>
                     `;
             contenedor.appendChild(columna);

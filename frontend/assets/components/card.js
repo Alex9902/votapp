@@ -7,7 +7,7 @@ class CardComponent extends HTMLElement {
         const idRol = this.getAttribute('rol-id');
 
         this.innerHTML = `
-        <div class="card text-center h-100 border-0 shadow-sm position-relative card-component">
+        <div class="card text-center h-100 position-relative card-component">
             <div class="d-flex align-items-center justify-content-center mx-auto mt-3 mb-4 icono-card bg-light">
         
                 <span class="material-symbols-outlined">

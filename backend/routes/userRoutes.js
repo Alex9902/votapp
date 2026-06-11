@@ -38,23 +38,35 @@ router.get('/roles', auth, async (req, res) => {
  * GET /api/elecciones
  * select elecciones activas para el rol,
  * en las cuales el usuario no ha votado
+ * 
+ * select elecciones pasadas el front las consume ylas pone gris
  */
 router.get('/elecciones', auth, async (req, res) => {
     try {
         const idUsuario = req.userData.id_usuario;
         const esAdmin = req.userData.es_admin;
         const ahora = new Date();
+        const diezDiasAtras = new Date();
+        diezDiasAtras.setDate(diezDiasAtras.getDate() - 10);
 
         //admin = todas las elecciones
         if (esAdmin) {
             const elecciones = await Votacion.findAll({
                 where: {
                     fecha_inicio: { [Op.lte]: ahora },
-                    fecha_fin: { [Op.gte]: ahora }
+                    fecha_fin: { [Op.gte]: diezDiasAtras }
                 }
             });
 
-            return res.json({ elecciones });
+            const eleccionesConRol = elecciones.map(el => {
+                const e = el.toJSON();
+                e.id_subcategoria = 'admin';
+                e.finalizada = new Date(el.fecha_fin) < ahora;
+                e.ya_votado = false;
+                return e;
+            });
+
+            return res.json({ elecciones: eleccionesConRol });
         }
 
         const rolQuery = req.query.rolId;
@@ -62,44 +74,57 @@ router.get('/elecciones', auth, async (req, res) => {
             return res.status(400).json({ error: "El parámetro rolId es requerido" });
         }
 
-        const idRol = parseInt(rolQuery, 10);
-        if (!idRol) {
-            return res.status(400).json({ error: "El parámetro rolId debe ser un número válido" });
+        //permitir varios roles por ,
+        const rolesIds = rolQuery.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
+        if (rolesIds.length === 0) {
+            return res.status(400).json({ error: "El parámetro rolId debe contener números válidos" });
         }
 
-        //obtiene las participaciones en roles ya votadas
-        const participaciones = await RegistroParticipacion.findAll({
-            where: {
-                id_usuario: idUsuario,
-                id_subcategoria: idRol
-            },
-            attributes: ['id_votacion']
-        });
+        let todasLasElecciones = [];
 
-        const eleccionesVotadasId = participaciones.map(p => p.id_votacion);
+        //participaciones ya votadas
+        for (const idRol of rolesIds) {
+            const participaciones = await RegistroParticipacion.findAll({
+                where: {
+                    id_usuario: idUsuario,
+                    id_subcategoria: idRol
+                },
+                attributes: ['id_votacion']
+            });
 
-        //construir where
-        const clausulaWhere = {
-            fecha_inicio: { [Op.lte]: ahora },
-            fecha_fin: { [Op.gte]: ahora }
-        };
+            const eleccionesVotadasId = participaciones.map(p => p.id_votacion);
 
-        if (eleccionesVotadasId.length > 0) {
-            clausulaWhere.id_votacion = { [Op.notIn]: eleccionesVotadasId };
+            const clausulaWhere = {
+                fecha_inicio: { [Op.lte]: ahora },
+                fecha_fin: { [Op.gte]: diezDiasAtras }
+            };
+
+            //activas o finalizadas hace menos de 10 dias
+            const elecciones = await Votacion.findAll({
+                where: clausulaWhere,
+                include: {
+                    model: Subcategoria,
+                    where: { id_subcategoria: idRol },
+                    attributes: ['id_subcategoria', 'nombre_rol'],
+                    through: { attributes: [] }
+                }
+            });
+
+            elecciones.forEach(el => {
+                const e = el.toJSON();
+                e.id_subcategoria = idRol;
+                e.nombre_rol_votacion = el.subcategoria && el.subcategoria[0] ? el.subcategoria[0].nombre_rol : '';
+
+                const haFinalizado = new Date(el.fecha_fin) < ahora;
+                e.finalizada = haFinalizado;
+                // Si la votación ya finalizó o el usuario ya votó, marcamos como ya_votado
+                e.ya_votado = eleccionesVotadasId.includes(el.id_votacion) || haFinalizado;
+
+                todasLasElecciones.push(e);
+            });
         }
 
-        //elecciones activas sin votar
-        const elecciones = await Votacion.findAll({
-            where: clausulaWhere,
-            include: {
-                model: Subcategoria,
-                where: { id_subcategoria: idRol },
-                attributes: [],
-                through: { attributes: [] }
-            }
-        });
-
-        return res.json({ elecciones });
+        return res.json({ elecciones: todasLasElecciones });
 
     } catch (error) {
         console.error("Error en GET /api/elecciones:", error);

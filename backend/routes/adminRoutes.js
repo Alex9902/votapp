@@ -352,7 +352,7 @@ router.get('/votaciones/:id/resultados', async (req, res) => {
             mapaVotos[v.id_opcion] = parseInt(v.get('cantidad'), 10);
         });
 
-        //payload de resultados de votos
+        //payload resultados de votos
         const resultados = opciones.map(op => ({
             id_opcion: op.id_opcion,
             texto_opcion: op.texto_opcion,
